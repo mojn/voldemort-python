@@ -1,0 +1,71 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.github.jengelman.gradle.plugins:shadow:0.9.0-M1'
+	}
+}
+
+apply plugin: 'shadow'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.7
+group = "com.mojn"
+version = '1.0-SNAPSHOT'
+archivesBaseName = "voldemort-python"
+mainClassName = "com.mojn.VoldemortPython"
+
+repositories {
+	maven {
+		credentials {
+		}
+		url "bla"
+	}
+}
+
+dependencies {
+	compile 'net.sf.py4j:py4j:0.8.2.1'
+    compile 'voldemort:client:1.6.0'
+	compile 'commons-lang:commons-lang:2.3'
+	compile 'commons-codec:commons-codec:1.8'
+}
+
+eclipse {
+    classpath {
+       downloadSources=true
+    }
+}
+
+shadowJar{
+	exclude dependency('org.slf4j:slf4j-api:1.7.7')
+	exclude dependency('org.slf4j:slf4j-simple:1.7.7')
+}
+
+publishing {
+	publications {
+		mavenJar(MavenPublication) {
+			from components.java
+		}
+		mavenShadowJar(MavenPublication) {
+			from components.shadow
+		}
+	}
+	repositories {
+		if (project.hasProperty("gitBranch") && (project.gitBranch == "refs/heads/master")) {
+			maven {
+				credentials {
+					username "maven"
+					password "maven123"
+				}
+				url "https://build.idtargeting.com/nexus/content/repositories/snapshots/"
+			}
+		} else if (!project.hasProperty("gitBranch")) {
+			mavenLocal()
+		}
+	}
+}
+

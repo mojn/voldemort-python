@@ -52,3 +52,17 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# virtualenv
+cienv
+
+# Java
+*.class
+
+# Gradle
+.gradle
+
+# Eclipse
+.project
+.pydevproject
+
