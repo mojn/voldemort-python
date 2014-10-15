@@ -66,3 +66,6 @@ cienv
 .project
 .pydevproject
 
+# Generated jar
+jvoldemort/*.jar
+

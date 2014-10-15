@@ -21,10 +21,13 @@ mainClassName = "com.mojn.VoldemortPython"
 
 repositories {
 	maven {
+		url "$repoUrl"
 		credentials {
+			username "$repoUser"
+			password "$repoPass"
 		}
-		url "bla"
 	}
+	mavenCentral()
 }
 
 dependencies {
