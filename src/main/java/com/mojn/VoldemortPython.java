@@ -20,6 +20,10 @@ public class VoldemortPython {
         factory = new CachingStoreClientFactory(new SocketStoreClientFactory(cc));
 	}
 	
+	public boolean isAlive() {
+		return true;
+	}
+	
     public StoreClient<String, Object> getClient(String storeName) {
         return factory.getStoreClient(storeName);
     }
@@ -30,6 +34,7 @@ public class VoldemortPython {
     
     public static void main(String[] args) {
         GatewayServer gatewayServer = new GatewayServer(new VoldemortPython(Arrays.copyOfRange(args, 1, args.length)), Integer.parseInt(args[0]));
+        System.out.println("Gateway starting");
         gatewayServer.start();
     }
 
