@@ -34,12 +34,12 @@ def _get_taken_ports():
 def _log_stdout(proc_name, process, status):
     process_logger = logging.getLogger(__name__ + '.' + proc_name)
     stream = process.stdout
-    while True:
+    while not process.poll():
         line = stream.readline()
         if line.strip().endswith('Gateway starting'):
             status[0] = True
         else:
-            process_logger.info(stream.readline())
+            process_logger.info(line)
     status[0] = False
 
 def _create_gateway(bootstrap_urls):
