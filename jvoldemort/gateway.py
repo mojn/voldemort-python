@@ -1,6 +1,8 @@
+import fcntl
 import logging
 import os
 import random
+import select
 from subprocess import (check_output,
                         Popen, 
                         PIPE,
@@ -34,12 +36,19 @@ def _get_taken_ports():
 def _log_stdout(proc_name, process, status):
     process_logger = logging.getLogger(__name__ + '.' + proc_name)
     stream = process.stdout
-    while not process.poll():
-        line = stream.readline()
-        if line.strip().endswith('Gateway starting'):
-            status[0] = True
-        elif line:
-            process_logger.info(line)
+    fcntl.fcntl(stream.fileno(), fcntl.F_SETFL, fcntl.fcntl(stream.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK)
+    line = ''
+    while process.poll() == None:
+        if select.select([stream.fileno()], [], [])[0]:
+            line += stream.read()
+            while '\n' in line:
+                output_line, _, line = line.partition('\n')
+                if output_line.strip().endswith('Gateway starting'):
+                    status[0] = True
+                elif output_line:
+                    process_logger.info(output_line)
+        else:
+            time.sleep(1)
     status[0] = False
 
 def _create_gateway(bootstrap_urls):
