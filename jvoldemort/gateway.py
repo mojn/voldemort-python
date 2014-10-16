@@ -38,7 +38,7 @@ def _log_stdout(proc_name, process, status):
         line = stream.readline()
         if line.strip().endswith('Gateway starting'):
             status[0] = True
-        else:
+        elif line:
             process_logger.info(line)
     status[0] = False
 
