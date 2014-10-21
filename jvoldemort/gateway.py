@@ -38,7 +38,6 @@ class Gateway(object):
 
     def __init__(self, bootstrap_urls):
         with self._gateway_lock:
-            self._start_cleanup_thread()
             self.bootstrap_urls = bootstrap_urls
             gateway_port = 25333 if not (self._gateways or self._dead_gateways) else max( g.gateway_port for g in chain(self._gateways.itervalues(), self._dead_gateways) ) + 1
             self.gateway = None
@@ -88,6 +87,8 @@ class Gateway(object):
             raise IOError('Could not establish java gateway server after having tried five different ports')
             
     def __getattr__(self, attribute_name):
+        if attribute_name in ('gateway_port', 'process', 'gateway', 'output_process_thread', 'bootstrap_urls'):
+            raise AttributeError('Gateway does not have an attribute called ' +  attribute_name)
         if self.gateway == 'closed':
             raise AttributeError('Closed Gateway does not have an attribute called ' +  attribute_name)
         return getattr(self.gateway, attribute_name)
