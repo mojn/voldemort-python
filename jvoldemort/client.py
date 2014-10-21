@@ -17,7 +17,8 @@ class StoreClient:
     def __init__(self, store_name, bootstrap_urls):
         self.store_name = store_name
         try:
-            self._java_client = Gateway(tuple( '%s:%d' % (h,p) for (h,p) in bootstrap_urls )).getClient(store_name)
+            self._java_gateway = Gateway(tuple( '%s:%d' % (h,p) for (h,p) in bootstrap_urls ))
+            self._java_client = self._java_gateway.getClient(store_name)
         except (IOError, Py4JError) as ex:
             raise VoldemortException(ex.message)
         self.key_serializer = self.value_serializer = _default_reader
@@ -36,8 +37,10 @@ class StoreClient:
             self.close()
             raise VoldemortException(getattr(ex, 'message', '') or str(ex))
         if result:
-            unwrapped_result = [self._get_value(result), result.getVersion().toString()]
-            self._java_client.detach(result)
+            try:
+                unwrapped_result = [self._get_value(result), result.getVersion().toString()]
+            finally:
+                self._java_gateway.detach(result)
         return unwrapped_result
 
     def get_all(self, keys):
