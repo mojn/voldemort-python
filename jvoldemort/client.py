@@ -1,4 +1,5 @@
 from .gateway import Gateway
+from py4j.protocol import Py4JError
 
 class VoldemortException(Exception):
     pass
@@ -17,7 +18,7 @@ class StoreClient:
         self.store_name = store_name
         try:
             self._java_client = Gateway(tuple( '%s:%d' % (h,p) for (h,p) in bootstrap_urls )).getClient(store_name)
-        except IOError as ex:
+        except (IOError, Py4JError) as ex:
             raise VoldemortException(ex.message)
         self.key_serializer = self.value_serializer = _default_reader
 
@@ -29,8 +30,15 @@ class StoreClient:
         
     def get(self, key):
         """Execute a get request. Returns a list of (value, version) pairs."""
-        result = self._java_client.get(self.key_serializer.writes(key))
-        return result and [(self._get_value(result), result.getVersion())]
+        try:
+            unwrapped_result = result = self._java_client.get(self.key_serializer.writes(key))
+        except Py4JError as ex:
+            self.close()
+            raise VoldemortException(getattr(ex, 'message', '') or str(ex))
+        if result:
+            unwrapped_result = [self._get_value(result), result.getVersion().toString()]
+            self._java_client.detach(result)
+        return unwrapped_result
 
     def get_all(self, keys):
         raise NotImplementedError('Not implemented yet')
