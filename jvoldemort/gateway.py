@@ -38,7 +38,7 @@ class Gateway(object):
     def __init__(self, bootstrap_urls):
         with self._gateway_lock:
             self.bootstrap_urls = bootstrap_urls
-            gateway_port = 25333 if not self._gateways else max( g.gateway_port for g in self._gateways.itervalues() ) + 1
+            gateway_port = 25333 if not self._gateways else max( g.gateway_port for g in self._gateways.itervalues() if g is not self ) + 1
             self.gateway = None
             for _ in xrange(5):
                 taken_ports = self._get_taken_ports()
