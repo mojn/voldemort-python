@@ -39,7 +39,7 @@ class Gateway(object):
         with self._gateway_lock:
             self.bootstrap_urls = bootstrap_urls
             gateway_port = 25333 if len(self._gateways) == 1 else max( g.gateway_port for g in self._gateways.itervalues() if g is not self ) + 1
-            self.gateway = None
+            self.gateway = gateway = None
             for _ in xrange(5):
                 taken_ports = self._get_taken_ports()
                 while gateway_port in taken_ports:
@@ -58,25 +58,30 @@ class Gateway(object):
                 if status[0]:
                     logger.debug("JVM running - trying to connect")
                     for connection_attempt in xrange(5):
-                        time.sleep(2**connection_attempt)
                         try:
                             gateway = JavaGateway(GatewayClient(port=gateway_port), auto_convert=False)
                             for alive_attempt in xrange(5):
-                                time.sleep(2**alive_attempt)
                                 try:
-                                    assert gateway.isAlive()
+                                    if gateway.isAlive():
+                                        break
                                 except Exception: # pylint: disable=W0703
-                                    if alive_attempt == 4:
-                                        raise
+                                    pass
+                                if alive_attempt == 4:
+                                    raise Exception()
+                                else:
+                                    time.sleep(2**alive_attempt)
                         except Exception: # pylint: disable=W0703
+                            gateway = None
                             if connection_attempt == 4:
                                 logger.warning('Could not connect to java gateway server at port %d', gateway_port)
-                        else:
+                        if gateway is not None:
                             self.gateway_port = gateway_port
                             self.process = process
                             self.gateway = gateway
                             self.output_process_thread = output_process_thread
                             break
+                        else:
+                            time.sleep(2**connection_attempt)
                 else:
                     process.terminate()
                 if self.gateway is not None:
