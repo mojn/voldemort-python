@@ -38,7 +38,7 @@ class StoreClient:
             raise VoldemortException(getattr(ex, 'message', '') or str(ex))
         if result:
             try:
-                unwrapped_result = [self._get_value(result), result.getVersion().toString()]
+                unwrapped_result = [[self._get_value(result), result.getVersion().toString()]]
             finally:
                 self._java_gateway.detach(result)
         return unwrapped_result
