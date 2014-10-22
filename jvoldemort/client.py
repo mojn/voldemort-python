@@ -36,7 +36,7 @@ class StoreClient:
         except Py4JError as ex:
             self.close()
             raise VoldemortException(getattr(ex, 'message', '') or str(ex))
-        if result:
+        if result is not None:
             try:
                 unwrapped_result = [[self._get_value(result), result.getVersion().toString()]]
             finally:
