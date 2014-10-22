@@ -1,12 +1,12 @@
 package com.mojn;
 
 import py4j.GatewayServer;
-
 import voldemort.client.ClientConfig;
 import voldemort.client.CachingStoreClientFactory;
 import voldemort.client.SocketStoreClientFactory;
-import voldemort.client.StoreClient;
 import voldemort.client.StoreClientFactory;
+import voldemort.versioning.VectorClock;
+import voldemort.versioning.Versioned;
 
 import java.util.Arrays;
 
@@ -24,12 +24,16 @@ public class VoldemortPython {
 		return true;
 	}
 	
-    public StoreClient<String, Object> getClient(String storeName) {
-        return factory.getStoreClient(storeName);
-    }
-
-    public void close() {
-    	factory.close();
+    public Object[] get(String storeName, String key) {
+    	Versioned<Object> resultObject = factory.getStoreClient(storeName).get(key);
+    	if (resultObject != null) {
+    		Object value = resultObject.getValue();
+    		VectorClock clock = (VectorClock)resultObject.getVersion();
+    		String version = Arrays.toString(clock.toBytes());
+	    	return new Object[]{ value, version };
+    	} else {
+    		return null;
+    	}
     }
     
     public static void main(String[] args) {

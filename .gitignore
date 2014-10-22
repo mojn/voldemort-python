@@ -65,7 +65,10 @@ cienv
 # Eclipse
 .project
 .pydevproject
+.settings
+.classpath
 
 # Generated jar
 jvoldemort/*.jar
 
+/bin

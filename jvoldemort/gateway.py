@@ -14,7 +14,7 @@ import time
 from py4j.java_gateway import (GatewayClient,
                                JavaGateway)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 logging.getLogger('py4j.java_gateway').setLevel(logging.WARNING)
 

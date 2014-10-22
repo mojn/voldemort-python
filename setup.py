@@ -43,7 +43,7 @@ if __name__ == "__main__":
     packages = packages + list(chain.from_iterable( tuple( p + '.' + n for n in find_packages(p) ) for p in packages ))
     
     setup(
-        name='Voldemort client lib',
+        name='jvoldemort',
         version='0.1dev',
         packages=packages,
         package_data={ 'jvoldemort': [ jar_file_name ] },
