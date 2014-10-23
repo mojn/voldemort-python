@@ -1,1 +1,1 @@
-py4j==0.8.2.1
+git+ssh://git@github.com/holbech/py4j.git

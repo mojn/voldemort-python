@@ -1,5 +1,9 @@
+import logging
+
 from .gateway import Gateway
 from py4j.protocol import Py4JError
+
+logger = logging.getLogger(__package__)
 
 class VoldemortException(Exception):
     pass
@@ -18,13 +22,11 @@ class StoreClient:
         self.store_name = store_name
         try:
             self._java_gateway = Gateway(tuple( '%s:%d' % (h,p) for (h,p) in bootstrap_urls ))
-            self._java_client = self._java_gateway.getClient(store_name)
         except (IOError, Py4JError) as ex:
             raise VoldemortException(ex.message)
         self.key_serializer = self.value_serializer = _default_reader
 
     def _get_value(self, result):
-        result = result.getValue()
         if isinstance(result, bytearray):
             result = str(result)
         return self.value_serializer.reads(result)
@@ -32,16 +34,15 @@ class StoreClient:
     def get(self, key):
         """Execute a get request. Returns a list of (value, version) pairs."""
         try:
-            unwrapped_result = result = self._java_client.get(self.key_serializer.writes(key))
+            unwrapped_result = result = self._java_gateway.get(self.store_name, self.key_serializer.writes(key))
+            if result is not None:
+                try:
+                    unwrapped_result = [[self._get_value(result[0]), result[1]]]
+                finally:
+                    self._java_gateway.detach(result)
+            return unwrapped_result
         except Py4JError as ex:
-            self.close()
-            raise VoldemortException(getattr(ex, 'message', '') or str(ex))
-        if result:
-            try:
-                unwrapped_result = [[self._get_value(result), result.getVersion().toString()]]
-            finally:
-                self._java_gateway.detach(result)
-        return unwrapped_result
+            raise VoldemortException("Error getting result from py4j bridge: " + getattr(ex, 'message', '') or str(ex))
 
     def get_all(self, keys):
         raise NotImplementedError('Not implemented yet')
@@ -56,8 +57,5 @@ class StoreClient:
         raise NotImplementedError('Not implemented yet')
 
     def close(self):
-        return self._java_client.close()
-
-
-
-
+        pass
+    
