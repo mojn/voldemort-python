@@ -37,6 +37,7 @@ class Gateway(object):
 
     def __init__(self, bootstrap_urls):
         with self._gateway_lock:
+            from . import JAVA_OPTS
             self.bootstrap_urls = bootstrap_urls
             gateway_port = 25333 if len(self._gateways) == 1 else max( g.gateway_port for g in self._gateways.itervalues() if g is not self ) + 1
             self.gateway = gateway = None
@@ -45,7 +46,7 @@ class Gateway(object):
                 while gateway_port in taken_ports:
                     gateway_port += 1
                 logger.debug("Trying to create Py4J gateway on port %d", gateway_port)
-                process = Popen('java -cp %s com.mojn.VoldemortPython %d %s' % (_jar_file, gateway_port, ' '.join( 'tcp://' + u for u in bootstrap_urls )), shell=True, stdout=PIPE, stderr=STDOUT)
+                process = Popen('java -cp %s %s com.mojn.VoldemortPython %d %s' % (_jar_file, JAVA_OPTS, gateway_port, ' '.join( 'tcp://' + u for u in bootstrap_urls )), shell=True, stdout=PIPE, stderr=STDOUT)
                 status = [False]
                 output_process_thread = Thread(target=self._log_stdout, args=('Voldemort-at-' + '/'.join(bootstrap_urls), process, status))
                 output_process_thread.daemon = True

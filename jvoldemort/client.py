@@ -57,5 +57,5 @@ class StoreClient:
         raise NotImplementedError('Not implemented yet')
 
     def close(self):
-        pass
+        self._java_gateway.close()
     
