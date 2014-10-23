@@ -13,12 +13,28 @@ import time
 
 from py4j.java_gateway import (GatewayClient,
                                JavaGateway)
+from py4j.protocol import (ERROR,
+                           Py4JNetworkError)
 
 logger = logging.getLogger(__package__)
 
 logging.getLogger('py4j.java_gateway').setLevel(logging.WARNING)
 
 _jar_file = os.path.join(os.path.dirname(__file__), 'voldemort-python.jar')
+
+class _RetryOnceGatewayClient(GatewayClient):
+    def send_command(self, command, retry=True):
+        connection = self._get_connection()
+        try:
+            response = connection.send_command(command)
+            self._give_back_connection(connection)
+        except Py4JNetworkError as ex:
+            if retry:
+                response = self.send_command(command, False)
+            else:
+                logger.info('Error sending command to gateway: %s', getattr(ex, 'message', '') or str(ex))
+                response = ERROR
+        return response
 
 class Gateway(object):
     
@@ -60,7 +76,7 @@ class Gateway(object):
                     logger.debug("JVM running - trying to connect")
                     for connection_attempt in xrange(5):
                         try:
-                            gateway = JavaGateway(GatewayClient(port=gateway_port), auto_convert=False)
+                            gateway = JavaGateway(_RetryOnceGatewayClient(port=gateway_port), auto_convert=False)
                             for alive_attempt in xrange(5):
                                 try:
                                     if gateway.isAlive():
@@ -100,8 +116,14 @@ class Gateway(object):
 
     def close(self):
         with self._gateway_lock:
+            logger.debug("Sealing Java gateway to " + str(self.bootstrap_urls))
             if self._gateways.get(self.bootstrap_urls) is self:
                 del self._gateways[self.bootstrap_urls]
+            logger.debug("Closing Java gateway to " + str(self.bootstrap_urls))
+            try:
+                self.gateway.shutdown()
+            except (AttributeError, TypeError):
+                pass
             self.gateway = 'closed'
             self.process.terminate()
 
