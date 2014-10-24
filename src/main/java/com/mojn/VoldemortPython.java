@@ -69,6 +69,9 @@ public class VoldemortPython {
 	        int listening_port = gatewayServer.getListeningPort();
 	        System.out.println("GatewayPort-" + listening_port);
 	        /* Exit on EOF or broken pipe. This ensures that the server dies if its parent program dies. */
+	        System.out.println("System.in.available: " + System.in.available());
+	        System.out.println("System.in.toString: " + System.in.toString());
+	        System.out.println("System.in.markSupported: " + System.in.markSupported());
 	        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         	stdin.readLine();
             System.out.println("Stdin closed - exiting");
