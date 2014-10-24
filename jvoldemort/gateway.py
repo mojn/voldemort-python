@@ -79,24 +79,22 @@ class Gateway(object):
         if self.gateway is not None:
             self.gateway.shutdown()
         if self.process is not None:
-            self.process.terminate()
-            self.process.wait()
+            try:
+                self.process.terminate()
+                self.process.wait()
+            except OSError:
+                pass # process already gone
         self.is_connected = self.is_running = False
-        self.client = self.process = self.gateway = None
+        self.gateway_port = self.client = self.process = self.gateway = None
 
     def _establish_connection(self, bootstrap_urls):
         from . import JAVA_OPTS
         self.bootstrap_urls = bootstrap_urls
-        self.gateway_port = 25333 if len(self._gateways) == 1 else max( g.gateway_port for g in self._gateways.itervalues() if g is not self ) + 1
-        self.client = self.process = self.gateway = None
-        for _ in xrange(5):
+        self.gateway_port = self.client = self.process = self.gateway = None
+        for _ in xrange(3):
             self._cleanup()
-            taken_ports = self._get_taken_ports()
-            while self.gateway_port in taken_ports:
-                self.gateway_port += 1
-            logger.debug("Trying to create Py4J gateway on port %d", self.gateway_port)
-            self.process = Popen(['java', '-cp', _jar_file] + JAVA_OPTS.split() +
-                                 ['com.mojn.VoldemortPython', str(self.gateway_port)] + [ 'tcp://' + u for u in bootstrap_urls ], 
+            logger.debug("Trying to create Py4J gateway")
+            self.process = Popen(['java', '-cp', _jar_file] + JAVA_OPTS.split() + ['com.mojn.VoldemortPython'] + [ 'tcp://' + u for u in bootstrap_urls ], 
                                  bufsize=1, preexec_fn=_preexec,
                                  stdout=PIPE, stderr=STDOUT)
             self.is_running = False
@@ -110,9 +108,17 @@ class Gateway(object):
                 elif attempt < 4:
                     time.sleep(2**attempt)
             if not self.is_running:
-                logger.debug("JVM never started running on port %d", self.gateway_port)
+                logger.debug("JVM never started running")
                 continue
-            logger.debug("JVM running - trying to connect")
+            for attempt in xrange(5):
+                if self.gateway_port:
+                    break
+                elif attempt < 4:
+                    time.sleep(2**attempt)
+            if not self.gateway_port:
+                logger.debug("JVM never emitted a port number on stdout")
+                continue
+            logger.debug("Gateway up - trying to connect")
             for attempt in xrange(5):
                 try:
                     self.client = _RetryOnceGatewayClient(port=self.gateway_port)
@@ -135,11 +141,9 @@ class Gateway(object):
                         time.sleep(2**attempt)
             if self.is_connected:
                 break
-            else:
-                self.gateway_port += random.randint(1,5)
         if not self.is_connected:
             self._cleanup()
-            raise IOError('Could not establish java gateway server after trying five different ports')
+            raise IOError('Could not establish java gateway server after trying three times')
 
     def __init__(self, bootstrap_urls):
         with self._gateway_lock:
@@ -167,10 +171,6 @@ class Gateway(object):
         except Exception:
             pass
 
-    @classmethod
-    def _get_taken_ports(cls):
-        return tuple( int(l.split()[3].split(':')[-1]) for l in check_output('netstat -nptl', shell=True, stderr=STDOUT).splitlines() if 'LISTEN' in l )
-    
     def _log_stdout(self, proc_name, process):
         process_logger = logging.getLogger(__name__ + '.' + proc_name)
         stream = process.stdout
@@ -183,6 +183,8 @@ class Gateway(object):
                     output_line, _, line = line.partition('\n')
                     if output_line.strip().endswith('Gateway starting'):
                         self.is_running = (self.process is process)
+                    elif 'GatewayPort-' in output_line:
+                        self.gateway_port = int(output_line.strip().rsplit('GatewayPort-', 1)[-1])
                     elif output_line:
                         process_logger.info(output_line)
             else:
