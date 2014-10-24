@@ -75,7 +75,7 @@ public class VoldemortPython {
 	        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         	stdin.readLine();
             System.out.println("Stdin closed - exiting");
-        	System.exit(0);
+        	//System.exit(0);
         } catch (Exception ex) {
     		String message = ex.getMessage();
     		if (message == null) {
