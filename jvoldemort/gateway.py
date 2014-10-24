@@ -2,10 +2,8 @@ import ctypes
 import fcntl
 import logging
 import os
-import random
 import select
-from subprocess import (check_output,
-                        Popen, 
+from subprocess import (Popen, 
                         PIPE,
                         STDOUT)
 from threading import (RLock,
@@ -167,6 +165,7 @@ class Gateway(object):
 
     def __del__(self):
         try:
+            logger.debug("Deleting Gateway object " + str(self.bootstrap_urls))
             self._cleanup()
         except Exception:
             pass
@@ -182,11 +181,12 @@ class Gateway(object):
                 while '\n' in line:
                     output_line, _, line = line.partition('\n')
                     if output_line.strip().endswith('Gateway starting'):
-                        self.is_running = (self.process is process)
+                        self.is_running = True
                     elif 'GatewayPort-' in output_line:
                         self.gateway_port = int(output_line.strip().rsplit('GatewayPort-', 1)[-1])
                     elif output_line:
                         process_logger.info(output_line)
             else:
                 time.sleep(1)
+        logger.debug("Stdout exhausted. Closing gateway " + str(self.bootstrap_urls))
         self._cleanup()

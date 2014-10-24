@@ -62,17 +62,23 @@ public class VoldemortPython {
     }
     
     public static void main(String[] args) {
-        GatewayServer gatewayServer = new GatewayServer(new VoldemortPython(Arrays.copyOfRange(args, 1, args.length)), 0);
-        System.out.println("Gateway starting");
-        gatewayServer.start();
-        int listening_port = gatewayServer.getListeningPort();
-        System.out.println("GatewayPort-" + listening_port);
-        /* Exit on EOF or broken pipe. This ensures that the server dies if its parent program dies. */
-        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         try {
+	        GatewayServer gatewayServer = new GatewayServer(new VoldemortPython(Arrays.copyOfRange(args, 1, args.length)), 0);
+	        System.out.println("Gateway starting");
+	        gatewayServer.start();
+	        int listening_port = gatewayServer.getListeningPort();
+	        System.out.println("GatewayPort-" + listening_port);
+	        /* Exit on EOF or broken pipe. This ensures that the server dies if its parent program dies. */
+	        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         	stdin.readLine();
+            System.out.println("Stdin closed - exiting");
         	System.exit(0);
-        } catch (java.io.IOException e) {
+        } catch (Exception ex) {
+    		String message = ex.getMessage();
+    		if (message == null) {
+    			message = ex.toString();
+    		}
+            System.out.println("IOException - exiting: " + message);
         	System.exit(1);
         }
     }
