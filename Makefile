@@ -14,7 +14,7 @@ cover:
 setup:
 	rm -rf cienv
 	virtualenv --system-site-packages cienv
-	cienv/bin/pip install -I -r voldemort/requirements.txt
+	cienv/bin/pip install -I -r requirements.txt
 
 setup-dev: setup
 	cienv/bin/pip install -I -r dev-requirements.txt
