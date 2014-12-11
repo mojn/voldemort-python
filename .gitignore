@@ -13,7 +13,6 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -68,7 +67,5 @@ cienv
 .settings
 .classpath
 
-# Generated jar
-jvoldemort/*.jar
-
 /bin
+.DS_Store

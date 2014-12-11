@@ -20,9 +20,9 @@ mainClassName = "com.mojn.VoldemortPython"
 
 dependencies {
   compile 'net.sf.py4j:py4j:0.8.2.1'
-  compile 'voldemort:client:1.6.0'
   compile 'commons-lang:commons-lang:2.3'
   compile 'commons-codec:commons-codec:1.8'
+  compile files('lib/voldemort-client-1.6.0.jar')
 }
 
 eclipse {

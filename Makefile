@@ -29,7 +29,6 @@ clean:
 	rm -rf build
 	rm -rf dist
 	rm -rf *egg-info*
-	rm -rf jvoldemort/*.jar
 	
 all: clean setup-dev lint test
 
