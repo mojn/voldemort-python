@@ -37,28 +37,3 @@ shadowJar{
     exclude dependency('org.slf4j:slf4j-simple:1.7.7')
   }
 }
-
-// publishing {
-//   publications {
-//     mavenJar(MavenPublication) {
-//       from components.java
-//     }
-//     mavenShadowJar(MavenPublication) {
-//       from components.shadow
-//     }
-//   }
-//   repositories {
-//     if (project.hasProperty("gitBranch") && (project.gitBranch == "refs/heads/master")) {
-//       maven {
-//         credentials {
-//           username "maven"
-//           password "maven123"
-//         }
-//         url "https://build.idtargeting.com/nexus/content/repositories/snapshots/"
-//       }
-//     } else if (!project.hasProperty("gitBranch")) {
-//       mavenLocal()
-//     }
-//   }
-// }
-
