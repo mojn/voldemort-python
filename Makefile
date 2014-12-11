@@ -15,6 +15,8 @@ setup:
 	rm -rf cienv
 	virtualenv --system-site-packages cienv
 	cienv/bin/pip install -I -r requirements.txt
+	gradle shadowJar
+	mv build/libs/*.jar jvoldemort/voldemort-python.jar
 
 setup-dev: setup
 	cienv/bin/pip install -I -r dev-requirements.txt
@@ -27,6 +29,7 @@ clean:
 	rm -rf build
 	rm -rf dist
 	rm -rf *egg-info*
+	rm -rf jvoldemort/*.jar
 	
 all: clean setup-dev lint test
 
