@@ -22,7 +22,14 @@ dependencies {
   compile 'net.sf.py4j:py4j:0.8.2.1'
   compile 'commons-lang:commons-lang:2.3'
   compile 'commons-codec:commons-codec:1.8'
-  compile 'voldemort:client:1.6.0'
+
+  // voldemort + dependencies
+  compile files("share/voldemort-1.6.0.jar")
+  compile 'com.google.guava:guava:15.0'
+  compile 'log4j:log4j:1.2.17'
+  compile 'org.jdom:jdom:1.1'
+  compile 'com.google.protobuf:protobuf-java:2.4.1'
+
 }
 
 eclipse {
