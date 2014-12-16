@@ -4,7 +4,11 @@ except:
     from distutils.core import setup
 
 dependency_links = [
-  'git+https://github.com/bartdag/py4j'
+  'git+https://github.com/bartdag/py4j#egg=py4j-0.9'
+]
+
+install_requires = [
+  'py4j==0.9'
 ]
 
 setup(
@@ -19,5 +23,6 @@ setup(
     author_email = 'sh@mojn.com',
     url = 'https://github.com/mojn/voldemort-python',
     license='Apache License 2.0',
+    install_requires=install_requires,
     dependency_links=dependency_links
 )
