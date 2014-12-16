@@ -4,11 +4,11 @@ except:
     from distutils.core import setup
 
 dependency_links = [
-  'git+https://github.com/bartdag/py4j#egg=py4j-0.9'
+  'git+https://github.com/bartdag/py4j#egg=py4j'
 ]
 
 install_requires = [
-  'py4j==0.9'
+  'py4j'
 ]
 
 setup(
