@@ -12,6 +12,9 @@ import voldemort.versioning.Versioned;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class VoldemortPython {
 
@@ -51,6 +54,44 @@ public class VoldemortPython {
     	}
     	try {
     		return tryGet(storeName, key);
+    	} catch (VoldemortException ex) {
+    		String message = ex.getMessage();
+    		if (message == null) {
+    			message = ex.toString();
+    		}
+    		System.out.println("Persistent voldemort error: " + message);
+    		return null;
+    	}
+    }
+    
+	private Map<Object, Object[]> tryGetAll(String storeName, Iterable<Object> keys) {
+    	Map<Object, Versioned<Object>> resultObject = factory.getStoreClient(storeName).getAll(keys);
+    	if (resultObject != null) {
+    		LinkedHashMap<Object, Object[]> result = new LinkedHashMap<>();
+    		for (Entry<Object, Versioned<Object>> entry : resultObject.entrySet()) {
+        		Object value = entry.getValue().getValue();
+        		VectorClock clock = (VectorClock)entry.getValue().getVersion();
+        		String version = Arrays.toString(clock.toBytes());
+    			result.put(entry.getKey(), new Object[]{ value, version });
+    		}
+	    	return result;
+    	} else {
+    		return null;
+    	}
+	}
+	
+    public Map<Object, Object[]> getAll(String storeName, Iterable<Object> keys) {
+    	try {
+    		return tryGetAll(storeName, keys);
+    	} catch (VoldemortException ex) {
+    		String message = ex.getMessage();
+    		if (message == null) {
+    			message = ex.toString();
+    		}
+    		System.out.println("Retrying after voldemort error: " + message);
+    	}
+    	try {
+    		return tryGetAll(storeName, keys);
     	} catch (VoldemortException ex) {
     		String message = ex.getMessage();
     		if (message == null) {

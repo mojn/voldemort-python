@@ -2,6 +2,7 @@ import logging
 
 from .gateway import Gateway
 from py4j.protocol import Py4JError
+from py4j.java_collections import ListConverter
 
 logger = logging.getLogger(__package__)
 
@@ -45,7 +46,18 @@ class StoreClient:
             raise VoldemortException("Error getting result from py4j bridge: " + getattr(ex, 'message', '') or str(ex))
 
     def get_all(self, keys):
-        raise NotImplementedError('Not implemented yet')
+        """Execute a get request with a tuple of keys. Returns a dict of Returns a dictionary of key => [(value, version), ...] pairs."""
+        try:
+            keys =  [ self.key_serializer.writes(k) for k in keys ]
+            unwrapped_result = result = self._java_gateway.getAll(self.store_name, ListConverter().convert(list(keys), self._java_gateway.gateway._gateway_client))
+            if result is not None:
+                try:
+                    unwrapped_result = { k: [self._get_value(v[0]), v[1]] for k,v in result.iteritems() }
+                finally:
+                    self._java_gateway.detach(result)
+            return unwrapped_result
+        except Py4JError as ex:
+            raise VoldemortException("Error getting result from py4j bridge: " + getattr(ex, 'message', '') or str(ex))
 
     def put(self, key, value, version = None):
         raise NotImplementedError('Not implemented yet')

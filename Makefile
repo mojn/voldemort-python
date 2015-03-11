@@ -16,7 +16,7 @@ setup:
 	virtualenv --system-site-packages cienv
 	cienv/bin/pip install -I -r requirements.txt
 	gradle shadowJar
-	mv build/libs/*.jar jvoldemort/voldemort-python.jar
+	mv build/libs/*-all.jar jvoldemort/voldemort-python.jar
 
 setup-dev: setup
 	cienv/bin/pip install -I -r dev-requirements.txt
