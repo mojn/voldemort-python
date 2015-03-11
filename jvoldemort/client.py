@@ -52,7 +52,7 @@ class StoreClient:
             unwrapped_result = result = self._java_gateway.getAll(self.store_name, ListConverter().convert(list(keys), self._java_gateway.gateway._gateway_client))
             if result is not None:
                 try:
-                    unwrapped_result = { k: [self._get_value(v[0]), v[1]] for k,v in result.iteritems() }
+                    unwrapped_result = { k: [[self._get_value(v[0]), v[1]]] for k,v in result.iteritems() }
                 finally:
                     self._java_gateway.detach(result)
             return unwrapped_result
