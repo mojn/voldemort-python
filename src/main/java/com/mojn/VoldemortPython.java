@@ -82,28 +82,23 @@ public class VoldemortPython {
 	
     public Map<Object, Object[]> getAll(String storeName, Iterable<Object> keys) {
     	try {
-	    	try {
-	    		return tryGetAll(storeName, keys);
-	    	} catch (VoldemortException ex) {
-	    		String message = ex.getMessage();
-	    		if (message == null) {
-	    			message = ex.toString();
-	    		}
-	    		System.out.println("Retrying after voldemort error: " + message);
-	    	}
-	    	try {
-	    		return tryGetAll(storeName, keys);
-	    	} catch (VoldemortException ex) {
-	    		String message = ex.getMessage();
-	    		if (message == null) {
-	    			message = ex.toString();
-	    		}
-	    		System.out.println("Persistent voldemort error: " + message);
-	    		return null;
-	    	}
-    	} catch (Exception ex2) {
-    		ex2.printStackTrace();
-    		throw ex2;
+    		return tryGetAll(storeName, keys);
+    	} catch (VoldemortException ex) {
+    		String message = ex.getMessage();
+    		if (message == null) {
+    			message = ex.toString();
+    		}
+    		System.out.println("Retrying after voldemort error: " + message);
+    	}
+    	try {
+    		return tryGetAll(storeName, keys);
+    	} catch (VoldemortException ex) {
+    		String message = ex.getMessage();
+    		if (message == null) {
+    			message = ex.toString();
+    		}
+    		System.out.println("Persistent voldemort error: " + message);
+    		return null;
     	}
     }
     
