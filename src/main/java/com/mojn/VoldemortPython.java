@@ -11,6 +11,7 @@ import voldemort.versioning.Versioned;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -64,15 +65,15 @@ public class VoldemortPython {
     	}
     }
     
-	private Map<Object, Object[]> tryGetAll(String storeName, Iterable<Object> keys) {
+	private ArrayList<Object[]> tryGetAll(String storeName, Iterable<Object> keys) {
     	Map<Object, Versioned<Object>> resultObject = factory.getStoreClient(storeName).getAll(keys);
     	if (resultObject != null) {
-    		LinkedHashMap<Object, Object[]> result = new LinkedHashMap<>();
+    		ArrayList<Object[]> result = new ArrayList<>();
     		for (Entry<Object, Versioned<Object>> entry : resultObject.entrySet()) {
         		Object value = entry.getValue().getValue();
         		VectorClock clock = (VectorClock)entry.getValue().getVersion();
         		String version = Arrays.toString(clock.toBytes());
-    			result.put(entry.getKey(), new Object[]{ value, version });
+    			result.add(new Object[]{ entry.getKey(), value, version });
     		}
 	    	return result;
     	} else {
@@ -80,7 +81,7 @@ public class VoldemortPython {
     	}
 	}
 	
-    public Map<Object, Object[]> getAll(String storeName, Iterable<Object> keys) {
+    public ArrayList<Object[]> getAll(String storeName, Iterable<Object> keys) {
     	try {
     		return tryGetAll(storeName, keys);
     	} catch (VoldemortException ex) {

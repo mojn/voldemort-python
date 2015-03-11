@@ -52,7 +52,8 @@ class StoreClient:
             unwrapped_result = result = self._java_gateway.getAll(self.store_name, ListConverter().convert(list(keys), self._java_gateway.gateway._gateway_client))
             if result is not None:
                 try:
-                    unwrapped_result = { k: [[self._get_value(v[0]), v[1]]] for k,v in result.iteritems() }
+                    result_copy = [ result[i] for i in xrange(len(result)) ] # avoid logging of NoSuchElementException on Java side
+                    unwrapped_result = { k: [[self._get_value(value), version]] for (k,value,version) in result_copy }
                 finally:
                     self._java_gateway.detach(result)
             return unwrapped_result

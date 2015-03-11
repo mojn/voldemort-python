@@ -1,5 +1,7 @@
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     from .client import StoreClient, VoldemortException
     import argparse
     parser = argparse.ArgumentParser('Voldemort client test interface')
@@ -16,4 +18,5 @@ if __name__ == '__main__':
     connection = StoreClient(args.store, [ (h.split(':')[0], int(h.split(':')[1])) for h in args.hosts ] )
     connection.value_serializer = _Base64ValueSerializer()
     print eval(args.command.replace('{}', 'connection'))
-    
+    import time
+    time.sleep(2)
