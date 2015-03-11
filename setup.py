@@ -11,9 +11,13 @@ install_requires = [
   'py4j'
 ]
 
+import jvoldemort
+__version__ = jvoldemort.__version__
+    
+
 setup(
     name='jvoldemort',
-    version='0.1dev',
+    version=__version__,
     packages=['jvoldemort'],
     package_data={ 
       'jvoldemort': [ 'voldemort-python.jar' ]
