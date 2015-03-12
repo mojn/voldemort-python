@@ -32,6 +32,9 @@ clean:
 	
 all: clean setup-dev lint test
 
+tag-in-git:
+	export PACKAGE_VERSION_NUMBER=`cienv/bin/python -c 'import jvoldemort; print jvoldemort.__version__'` && git tag v$$PACKAGE_VERSION_NUMBER && git push origin v$$PACKAGE_VERSION_NUMBER
+
 test-ci: clean setup-dev
 	cienv/bin/python cienv/bin/nosetests --with-process-isolation --processes=8 --process-timeout=240
 	find -iname '*.py' | grep -E -v -f no_linting.grep | sort | xargs cienv/bin/pylint --output-format=colorized --reports=n --disable=C,R,I0011,W0142,W0603,W0223,W0511,W0123 --msg-template='{line}: {msg}({msg_id})' 
