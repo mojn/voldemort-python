@@ -14,7 +14,7 @@ cover:
 setup:
 	rm -rf cienv
 	virtualenv --system-site-packages cienv
-	cienv/bin/pip install -I -r requirements.txt
+	cienv/bin/pip install -I -r jvoldemort/requirements.txt
 	gradle shadowJar
 	mv build/libs/*-all.jar jvoldemort/voldemort-python.jar
 
