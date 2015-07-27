@@ -42,7 +42,7 @@ if __name__ == "__main__":
         author_email='sh@mojn.com',
         url='https://github.com/mojn/voldemort-python',
         packages=packages,
-        package_data={ 'jvoldemort': [ 'voldemort-python.jar' ] },
+        package_data={ 'jvoldemort': [ 'voldemort-python.jar', 'requirements.txt' ] },
         description = 'py4j voldemort bindings',
         long_description=open('README.md').read(),
         license='Apache License 2.0',
